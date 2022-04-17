@@ -32,5 +32,7 @@ t3 = Set.fromList [5,7,9]
 
 -- >>> Set.toList t3
 
+-- >>> show (Set.merge t3 Set.empty) == show (Set.merge Set.empty t3)
+
 main :: IO ()
 main = return ()

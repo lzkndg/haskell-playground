@@ -45,5 +45,28 @@ merge :: Ord a => T a -> T a -> T a
 merge Leaf Leaf = Leaf
 merge ta Leaf = ta
 merge Leaf tb = tb
-merge ta tb = foldr insert tb taAsList
-    where taAsList = toList ta
+merge ta tb = foldr insert tb (toList ta)
+
+-- >>> Set.member 3 t1
+
+-- >>> t1 == t2
+
+-- >>> Set.insert 3 t1
+
+-- >>> show t1
+
+-- >>> show t2
+
+-- >>> show t3
+
+-- >>> show (t1 <> t2) == show t2
+
+-- >>> show ((<>) t1 ((<>) t2 t3))
+
+-- >>> show ((<>) ((<>) t1 t2) t3)
+
+-- >>> show ((<>) ((<>) t1 t2) t3) == show ((<>) t1 ((<>) t2 t3))
+
+-- >>> Set.toList t3
+
+-- >>> show (Set.merge t3 Set.empty) == show (Set.merge Set.empty t3)
