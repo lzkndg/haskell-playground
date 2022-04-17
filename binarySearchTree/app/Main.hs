@@ -22,11 +22,15 @@ t3 = Set.fromList [5,7,9]
 
 -- >>> show t3
 
--- >>> t1 <> t2
+-- >>> show (t1 <> t2) == show t2
 
 -- >>> show ((<>) t1 ((<>) t2 t3))
 
 -- >>> show ((<>) ((<>) t1 t2) t3)
+
+-- >>> show ((<>) ((<>) t1 t2) t3) == show ((<>) t1 ((<>) t2 t3))
+
+-- >>> Set.toList t3
 
 main :: IO ()
 main = return ()

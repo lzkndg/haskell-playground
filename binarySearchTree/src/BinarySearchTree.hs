@@ -22,14 +22,7 @@ instance Ord a => Monoid (T a) where
 
 toList :: Ord a => T a -> [a]
 toList Leaf = []
-toList (Node ta r tb) = qsort (toList ta ++ [r] ++ toList tb)
-    where
-        qsort [] = []
-        qsort (x:xs) =
-            qsort smaller ++ [x] ++ qsort larger
-                where
-                    smaller = [a | a <- xs, a <= x]
-                    larger = [b | b <- xs, b > x]
+toList (Node ta r tb) = toList ta ++ [r] ++ toList tb
 
 member :: Ord a => a -> T a -> Bool
 member e Leaf = False
