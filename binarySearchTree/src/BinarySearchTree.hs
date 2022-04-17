@@ -20,9 +20,16 @@ instance Ord a => Semigroup (T a) where
 instance Ord a => Monoid (T a) where
     mempty = Leaf
 
-toList :: T a -> [a]
+toList :: Ord a => T a -> [a]
 toList Leaf = []
-toList (Node ta r tb) = toList ta ++ [r] ++ toList tb
+toList (Node ta r tb) = qsort (toList ta ++ [r] ++ toList tb)
+    where
+        qsort [] = []
+        qsort (x:xs) =
+            qsort smaller ++ [x] ++ qsort larger
+                where
+                    smaller = [a | a <- xs, a <= x]
+                    larger = [b | b <- xs, b > x]
 
 member :: Ord a => a -> T a -> Bool
 member e Leaf = False
@@ -39,14 +46,7 @@ insert e (Node ta r tb)
     | otherwise = Node ta r tb
 
 fromList :: Ord a => [a] -> T a
-fromList xs = foldr insert Leaf (qsort xs)
-    where
-        qsort [] = []
-        qsort (x:xs) = 
-            qsort smaller ++ [x] ++ qsort larger
-                where
-                    smaller = [a | a <- xs, a <= x]
-                    larger = [b | b <- xs, b > x]
+fromList = foldr insert Leaf
 
 merge :: Ord a => T a -> T a -> T a
 merge Leaf Leaf = Leaf
