@@ -15,7 +15,7 @@ instance Functor T where
     fmap g (Node ta r tb) = Node (fmap g ta) (g r) (fmap g tb)
 
 instance Ord a => Semigroup (T a) where
-    (<>) a b = merge a b
+    (<>) = merge
 
 -- instance Monoid (T a) where
 --     x <> mempty = x
