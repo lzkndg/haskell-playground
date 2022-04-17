@@ -17,10 +17,8 @@ instance Functor T where
 instance Ord a => Semigroup (T a) where
     (<>) = merge
 
--- instance Monoid (T a) where
---     x <> mempty = x
---     mempty <> x = x
---     x <> (y <> z) = (x <> y) <> z
+instance Ord a => Monoid (T a) where
+    mempty = Leaf
 
 toList :: T a -> [a]
 toList Leaf = []
