@@ -2,9 +2,9 @@ name:                binarySearchTree
 version:             0.1.0.0
 github:              "githubuser/binarySearchTree"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2022 Author name here"
+author:              "Luzia Kündig"
+maintainer:          "luzia.kuendig@ost.ch"
+copyright:           "2022 Luzia Kündig"
 
 extra-source-files:
 - README.md
@@ -46,3 +46,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - binarySearchTree
+    - hspec

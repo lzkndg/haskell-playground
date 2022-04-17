@@ -9,9 +9,9 @@ version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/binarySearchTree#readme>
 homepage:       https://github.com/githubuser/binarySearchTree#readme
 bug-reports:    https://github.com/githubuser/binarySearchTree/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2022 Author name here
+author:         Luzia Kündig
+maintainer:     luzia.kuendig@ost.ch
+copyright:      2022 Luzia Kündig
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -57,4 +57,5 @@ test-suite binarySearchTree-test
   build-depends:
       base >=4.7 && <5
     , binarySearchTree
+    , hspec
   default-language: Haskell2010
