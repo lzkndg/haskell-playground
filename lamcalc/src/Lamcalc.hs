@@ -11,11 +11,11 @@ data Term = Var Id   -- Variables
 reduce :: a
 reduce = undefined
 
-freeVars :: Term -> [a]
+freeVars :: Term -> [Id]
 freeVars (Var v) = []
-freeVars (Abs v (Var x)) = []
+freeVars (Abs v (Var x)) = [x | v /= x]
 freeVars (Abs v (Abs id term)) = undefined
-freeVars (Abs v (App term1 term2)) = undefined 
+freeVars (Abs v (App term1 term2)) = undefined
 freeVars (App term1 term2) = undefined
 
 -- isBetaRedex :: Term -> Bool 
