@@ -9,9 +9,10 @@ data Term = Var Id   -- Variables
     | App Term Term  -- Applications
 
 nfin :: Id -> Term -> Bool
-nfin _ (Var id) = False
-nfin x (Abs id term) = x == id
-nfin x (App t1 t2) = nfin x t1 || nfin x t2
+nfin (Var x) (Var y) = x /= y
+nfin (Var x) (Abs x term) = True
+nfin (Var x) (Abs y term) = x /= y && nfin x (Abs y term)
+nfin (Var x) (App t1 t2) = nfin x t1 && nfin x t2
 
 freeVars :: Term -> [Id]
 freeVars (Var v) = []
