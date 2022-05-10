@@ -8,15 +8,23 @@ data Term = Var Id   -- Variables
     | Abs Id Term    -- Abstractions
     | App Term Term  -- Applications
 
-reduce :: a
-reduce = undefined
+nfin :: Id -> Term -> Bool
+nfin _ (Var id) = False
+nfin x (Abs id term) = x == id
+nfin x (App t1 t2) = nfin x t1 || nfin x t2
 
 freeVars :: Term -> [Id]
 freeVars (Var v) = []
-freeVars (Abs v (Var x)) = [x | v /= x]
-freeVars (Abs v (Abs id term)) = undefined
+freeVars (Abs v (Var x)) = [x | nfin x (Abs v (Var x))]
+
+freeVars (Abs v (Abs id term)) = [v | nfin v term] ++ 
+
 freeVars (Abs v (App term1 term2)) = undefined
+
 freeVars (App term1 term2) = undefined
+
+reduce :: a
+reduce = undefined
 
 -- isBetaRedex :: Term -> Bool 
 -- isBetaRedex (Var id) = False
@@ -39,4 +47,13 @@ App (abs _ _ ) (Var)
 
 Free variable:
 Alle Var in Term t, die nicht in ( Abs >>Var<< (Term t) ) vorkommen
+
+square -> no freevar
+\x. x * x
+Abs (id x) ( Term ((id x) * (id x)) )
+
+timesX -> freevar x
+\y. y*x
+Abs (id y) ( Term ((id y) * (id x)) )
+
 -}
