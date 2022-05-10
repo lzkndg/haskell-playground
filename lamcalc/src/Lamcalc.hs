@@ -11,20 +11,32 @@ data Term = Var Id   -- Variables
 reduce :: a
 reduce = undefined
 
--- freeVars :: Term -> [a]
--- freeVars (Var x) = []
--- freeVars (Abs (Var x) t) =  freeVars t
--- freeVars (App t1 t2) = freeVars t1 ++ freeVars t2 
+freeVars :: Term -> [a]
+freeVars (Var v) = []
+freeVars (Abs v (Var x)) = []
+freeVars (Abs v (Abs id term)) = undefined
+freeVars (Abs v (App term1 term2)) = undefined 
+freeVars (App term1 term2) = undefined
 
-isBetaRedex :: Term -> Bool 
-isBetaRedex (Var id) = False
-isBetaRedex (Abs id (Var v)) = False
--- isBetaRedex (Abs id (Term t)) = isBetaRedex t
-isBetaRedex (App t1 t2) = isBetaRedex t1 || isBetaRedex t2
--- isBetaRedex (App (Abs x t) (Var id)) = True
-isBetaRedex (Abs [] (Abs _ _)) = False
-isBetaRedex (Abs [] (App _ _)) = False
-isBetaRedex (Abs [_] (App _ _)) = False
-isBetaRedex (Abs (_:_) (Abs _ _)) = False 
-isBetaRedex (Abs (_:_) (App _ _)) = False
+-- isBetaRedex :: Term -> Bool 
+-- isBetaRedex (Var id) = False
+-- isBetaRedex (Abs id (Var v)) = False
+-- -- isBetaRedex (Abs id (Term t)) = isBetaRedex t
+-- isBetaRedex (App t1 t2) = isBetaRedex t1 || isBetaRedex t2
+-- -- isBetaRedex (App (Abs x t) (Var id)) = True
+-- isBetaRedex (Abs [] (Abs _ _)) = False
+-- isBetaRedex (Abs [] (App _ _)) = False
+-- isBetaRedex (Abs [_] (App _ _)) = False
+-- isBetaRedex (Abs (_:_) (Abs _ _)) = False 
+-- isBetaRedex (Abs (_:_) (App _ _)) = False
 
+{-
+
+Var x
+Abs (id) (term)
+App (abs _ _ ) (Var)
+
+
+Free variable:
+Alle Var in Term t, die nicht in ( Abs >>Var<< (Term t) ) vorkommen
+-}
