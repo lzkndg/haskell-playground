@@ -9,6 +9,13 @@ data Term = Var Id   -- Variables
     | Abs Id Term    -- Abstractions
     | App Term Term  -- Applications
 
+instance Eq Term where
+    Var a == Var b = a == b
+    Abs x1 term1 == Abs x2 term2 = x1 == x2 && term1 == term2
+    App term1 term2 == App term3 term4 = term1 == term3 && term2 == term4
+    _ == _ = False
+
+
 nfin :: Id -> Term -> Bool
 nfin x (Var y) = False                          -- single variable is always free
 nfin x (Abs y term)                             -- abstraction of a variable could capture
@@ -18,22 +25,39 @@ nfin x (App t1 t2) = nfin x t1 || nfin x t2     -- application must be recursive
 
 -- >>> nfin "x" (App (Abs "x" (Var "x")) (Var "a"))
 -- True
-
 -- >>> nfin "b" (App (Abs "x" (Var "x")) (Var "a"))
 -- False
 
 -- >>> nfin "x" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
--- False
-
+-- True
+-- >>> nfin "y" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
+-- True
 -- >>> nfin "a" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
 -- False
 
 freeVars :: Term -> Set.Set Id
 freeVars (Var v) = Set.insert v Set.empty
 freeVars (Abs x term) = Set.delete x (freeVars term)
+freeVars (App term1 (Var v))
+    | nfin v term1 = freeVars term1
+    | otherwise = Set.insert v (freeVars term1)
 freeVars (App term1 term2) = Set.union (freeVars term1) (freeVars term2)
 
+-- >>> freeVars (App (Var "x") (Var "y"))
+-- fromList ["x","y"]
+-- >>> freeVars (Abs "x" (App (Var "x") (Var "y")))
+-- fromList ["y"]
+-- >>> freeVars (Abs "y" (App (Var "x") (Var "y")))
+-- fromList ["x"]
+-- >>> freeVars (Abs "z" (App (Var "x") (Var "y")))
+-- fromList ["x","y"]
+
+-- >>> freeVars (Abs "y" (Abs "x" (App (Var "x") (Var "y"))))
+-- fromList []
+
 -- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
+-- fromList []
+-- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "z"))
 
 -- substitute :: (Id, Term) -> Term
 -- substitute x (Var x) = Id tx 
