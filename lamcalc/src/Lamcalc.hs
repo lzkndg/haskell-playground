@@ -15,7 +15,6 @@ instance Eq Term where
     App term1 term2 == App term3 term4 = term1 == term3 && term2 == term4
     _ == _ = False
 
-
 nfin :: Id -> Term -> Bool
 nfin x (Var y) = False                          -- single variable is always free
 nfin x (Abs y term)                             -- abstraction of a variable could capture
@@ -58,28 +57,30 @@ freeVars (App term1 term2) = Set.union (freeVars term1) (freeVars term2)
 -- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
 -- fromList []
 -- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "z"))
+-- fromList ["z"]
 
--- substitute :: (Id, Term) -> Term
--- substitute x (Var x) = Id tx 
+substitute :: (Id, Term) -> Term -> Term
+-- substitute (x, tx) t replaces all free occurrences of the variable xi within the term t with the variable name tx, assuming the variable has a free occurence.
+substitute (x, termx) (Var y)
+    | x == y = termx
+    | otherwise = Var y
+substitute (x, termx) (Abs y term)
+    | x /= y = Abs y (substitute (x, termx) term)
+    | otherwise = undefined
+substitute (x, termx) (App term1 term2) = App (substitute (x, termx) term1) (substitute (x, termx) term2)
+
+-- >>> substitute ("y", (Var "z")) (Var "y") == Var "z"
+-- True
+-- >>> substitute ("y", (Var "z")) (Abs "x" (Var "y")) == Abs "x" (Var "z")
+-- True
 
 isBetaRedex :: Term -> Bool
-isBetaRedex = undefined
--- isBetaRedex (Var id) = False
--- isBetaRedex (Abs id (Var v)) = False
--- -- isBetaRedex (Abs id (Term t)) = isBetaRedex t
--- isBetaRedex (App t1 t2) = isBetaRedex t1 || isBetaRedex t2
--- -- isBetaRedex (App (Abs x t) (Var id)) = True
--- isBetaRedex (Abs [] (Abs _ _)) = False
--- isBetaRedex (Abs [] (App _ _)) = False
--- isBetaRedex (Abs [_] (App _ _)) = False
--- isBetaRedex (Abs (_:_) (Abs _ _)) = False 
--- isBetaRedex (Abs (_:_) (App _ _)) = False
-
+isBetaRedex (App (Abs "x" term1) term2) = True
+isBetaRedex _ = False
 
 reduce :: Term -> Term
-reduce = undefined
--- reduce (Var a) = Var a
--- reduce Abs (Var a) (Term t) = 
+reduce term1 = undefined
+-- reduce term1 | isBetaRedex term1 = 
 
 -- >>> reduce (App (Abs "x" (Var "x")) (Var "a")) == (Var "a")
 
