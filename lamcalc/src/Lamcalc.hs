@@ -2,6 +2,8 @@ module Lamcalc
     ( reduce
     ) where
 
+import qualified Data.Set as Set
+
 type Id = String
 
 data Term = Var Id   -- Variables
@@ -9,25 +11,25 @@ data Term = Var Id   -- Variables
     | App Term Term  -- Applications
 
 nfin :: Id -> Term -> Bool
-nfin (Var x) (Var y) = x /= y
-nfin (Var x) (Abs x term) = True
-nfin (Var x) (Abs y term) = x /= y && nfin x (Abs y term)
-nfin (Var x) (App t1 t2) = nfin x t1 && nfin x t2
+nfin (Id x) (Id y) = False                          -- single variable is always free
+nfin (Id x) (Abs y term)
+    | x == y = True
+    | otherwise = nfin x term
+nfin (Id x) (App t1 t2) = nfin x t1 || nfin x t2
 
 freeVars :: Term -> [Id]
-freeVars (Var v) = []
-freeVars (Abs v (Var x)) = [x | nfin x (Abs v (Var x))]
+freeVars Term = Set.empty
+freeVars (Id v) = Set.insert v
+freeVars (Abs x term)
+    | x nfin term = delete x (freeVars term)
+    | otherwise = Set.union (Set.insert x) (freeVars term)
+freeVars (App term1 term2) = Set.union (freeVars term1) (freeVars term2)
 
-freeVars (Abs v (Abs id term)) = [v | nfin v term] ++ 
+substitute :: (Id, Term) -> Term
+substitute = undefined
 
-freeVars (Abs v (App term1 term2)) = undefined
-
-freeVars (App term1 term2) = undefined
-
-reduce :: a
-reduce = undefined
-
--- isBetaRedex :: Term -> Bool 
+isBetaRedex :: Term -> Bool 
+isBetaRedex = undefined
 -- isBetaRedex (Var id) = False
 -- isBetaRedex (Abs id (Var v)) = False
 -- -- isBetaRedex (Abs id (Term t)) = isBetaRedex t
@@ -38,6 +40,16 @@ reduce = undefined
 -- isBetaRedex (Abs [_] (App _ _)) = False
 -- isBetaRedex (Abs (_:_) (Abs _ _)) = False 
 -- isBetaRedex (Abs (_:_) (App _ _)) = False
+
+
+reduce :: Term -> Term
+reduce (Var a) = Var a
+reduce = undefined
+-- reduce Abs (Var a) (Term t) = 
+
+
+
+-- >>> reduce (App (Abs "x" (Var "x")) (Var "a")) == (Var "a")
 
 {-
 
@@ -58,3 +70,23 @@ timesX -> freevar x
 Abs (id y) ( Term ((id y) * (id x)) )
 
 -}
+
+-- `(λx.x) a` reduces to `a`
+-- >>> reduce (App (Abs "x" (Var "x")) (Var "a")) == (Var "a")
+-- True
+
+-- `(λx.x x) (λx.x)` reduces to `λx.x`
+-- >>> reduce (App (Abs "x" (App (Var "x") (Var "x"))) (Abs "x" (Var "x"))) == (Abs "x" (Var "x")) 
+-- True
+
+-- `(λx.λy.x y) y` reduces to `λy1.y y1`, and not `λy.y y`
+-- >>> reduce (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y")) == (Abs "y1" (App (Var "y") (Var "y1")))
+-- True
+
+-- Note: The above test case is too brittle since its success depends on the choice of the fresh variable `y1` chosen to avoid variable capture.
+-- To make the test more robust, it would be better to check that the two terms are alpha equivalent instead. 
+-- Note: Checking if two terms are alpha equivalent is not part of the minimum goal.
+
+-- `(λx.λy.x y) y` reduces to a term that is alpha equivalent to `λz.y z`
+-- >>> alphaEq (reduce (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))) (Abs "z" (App (Var "y") (Var "z")))
+-- True
