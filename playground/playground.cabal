@@ -25,6 +25,8 @@ source-repository head
 
 library
   exposed-modules:
+      Expr
+      IO
       Lib
   other-modules:
       Paths_playground

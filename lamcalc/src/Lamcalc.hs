@@ -15,6 +15,18 @@ instance Eq Term where
     App term1 term2 == App term3 term4 = term1 == term3 && term2 == term4
     _ == _ = False
 
+instance Show Term where
+    show = prettyPrint
+
+prettyPrint :: Term -> String
+prettyPrint (Var x) = x
+prettyPrint (Abs x term) = "(%" ++ x ++ "." ++ prettyPrint term ++ ")"
+prettyPrint (App term1 term2) = "(" ++ prettyPrint term1 ++ " " ++ prettyPrint term2 ++ ")"
+
+
+-- >>> prettyPrint (App (Abs "x" (Var "x")) (Var "a"))
+-- "((%x.x) a)"
+
 nfin :: Id -> Term -> Bool
 nfin x (Var y) = False                          -- single variable is always free
 nfin x (Abs y term)                             -- abstraction of a variable could capture
@@ -42,22 +54,22 @@ freeVars (App term1 (Var v))
     | otherwise = Set.insert v (freeVars term1)
 freeVars (App term1 term2) = Set.union (freeVars term1) (freeVars term2)
 
--- >>> freeVars (App (Var "x") (Var "y"))
--- fromList ["x","y"]
--- >>> freeVars (Abs "x" (App (Var "x") (Var "y")))
--- fromList ["y"]
--- >>> freeVars (Abs "y" (App (Var "x") (Var "y")))
--- fromList ["x"]
--- >>> freeVars (Abs "z" (App (Var "x") (Var "y")))
--- fromList ["x","y"]
+-- >>> freeVars (App (Var "x") (Var "y")) == Set.fromList ["x","y"]
+-- True
+-- >>> freeVars (Abs "x" (App (Var "x") (Var "y"))) == Set.fromList["y"]
+-- True
+-- >>> freeVars (Abs "y" (App (Var "x") (Var "y"))) == Set.fromList ["x"]
+-- True
+-- >>> freeVars (Abs "z" (App (Var "x") (Var "y"))) == Set.fromList ["x","y"]
+-- True
 
--- >>> freeVars (Abs "y" (Abs "x" (App (Var "x") (Var "y"))))
--- fromList []
+-- >>> freeVars (Abs "y" (Abs "x" (App (Var "x") (Var "y")))) == Set.fromList []
+-- True
 
--- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
--- fromList []
--- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "z"))
--- fromList ["z"]
+-- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y")) == Set.fromList []
+-- True
+-- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "z")) == Set.fromList ["z"]
+-- True
 
 substitute :: (Id, Term) -> Term -> Term
 -- substitute (x, tx) t replaces all free occurrences of the variable xi within the term t with the variable name tx, assuming the variable has a free occurence.
@@ -69,7 +81,7 @@ substitute (x, termx) (Abs y term)
     | otherwise = undefined
 substitute (x, termx) (App term1 term2) = App (substitute (x, termx) term1) (substitute (x, termx) term2)
 
--- >>> substitute ("y", (Var "z")) (Var "y") == Var "z"
+-- >>> prettyPrint (substitute ("y", (Var "z")) (Var "y")) == "z"
 -- True
 -- >>> substitute ("y", (Var "z")) (Abs "x" (Var "y")) == Abs "x" (Var "z")
 -- True
@@ -78,11 +90,16 @@ isBetaRedex :: Term -> Bool
 isBetaRedex (App (Abs "x" term1) term2) = True
 isBetaRedex _ = False
 
+betaReduce :: Term -> Term
+betaReduce (App (Abs x term1) term2) = substitute (x, term2) (Abs x term1)
+betaReduce term = term
+
 reduce :: Term -> Term
 reduce term1 = undefined
 -- reduce term1 | isBetaRedex term1 = 
 
--- >>> reduce (App (Abs "x" (Var "x")) (Var "a")) == (Var "a")
+-- >>> betaReduce (App (Abs "x" (Var "x")) (Var "a"))
+-- Prelude.undefined
 
 {-
 

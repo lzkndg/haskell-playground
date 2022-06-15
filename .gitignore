@@ -21,3 +21,6 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+Haskell-Exercises-shmup-2022-FS/
+isabelle/
+lamcalc/luzia-kuendig-lambdacalculator.zip
