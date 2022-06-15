@@ -28,4 +28,10 @@ perfects n = [x | x <- [1..n], sum (factors x) == x]
 
 -- 7
 -- [(x, y) | x <- [1,2], y <- [3,4]]
-someTuples x y = [(x, y) | ]
+-- someTuples x y = [(x, y) | ]
+
+-- 8
+
+-- 9
+scalarproduct :: [Int] -> [Int] -> Int 
+scalarproduct xs ys = sum [a*b | (a, b) <- zip xs ys] 
