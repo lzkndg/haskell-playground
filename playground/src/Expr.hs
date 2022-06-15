@@ -19,5 +19,5 @@ instance Applicative where
 
 
 
-(pure (\ x y -> [x] ++ [y]) <*> (Add (Val 1) (Var 'x')) <*> (Add (Val 2) (Var 'y')))
+-- (pure (\ x y -> [x] ++ [y]) <*> (Add (Val 1) (Var 'x')) <*> (Add (Val 2) (Var 'y')))
 
