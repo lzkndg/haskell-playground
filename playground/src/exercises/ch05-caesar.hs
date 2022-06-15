@@ -6,22 +6,28 @@ import Prelude
 lowers :: String -> Int
 lowers xs = length [x | x <- xs, isAsciiLower x]
 
-count :: Char -> String -> Int 
+count :: Char -> String -> Int
 count x xs = length [x' | x' <- xs, x == x']
 
 let2int :: Char -> Int
-let2int c = ord c - ord 'a'
+let2int c 
+    | isUpper c = ord c - ord 'A' 
+    | isLower c = ord c - ord 'A' - 6
+    | otherwise = undefined
 
 int2let :: Int -> Char
-int2let n = chr (ord 'a' + n)
+int2let n
+    | n >= 0 && n <= 25 = chr (ord 'A' + n)
+    | n > 25 && n < 52 = chr (ord 'A' + n + 6)
+    | otherwise = undefined
 
 shift :: Int -> Char -> Char
 shift n c
-    | isLower c = int2let((let2int c + n) `mod` 26)
-    | otherwise = c 
+    | isAlpha c = int2let((let2int c + n) `mod` 52)
+    | otherwise = c
 
 encode :: Int -> [Char] -> [Char]
-encode n xs = [shift n c | c <- xs] 
+encode n xs = [shift n c | c <- xs]
 
 table :: [Float]
 table = [8.1, 1.5, 2.8, 4.2, 12.7, 2.2, 2.0, 6.1, 7.0,
