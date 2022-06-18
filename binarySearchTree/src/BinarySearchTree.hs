@@ -2,6 +2,8 @@ module BinarySearchTree
 ( T, empty, insert, fromList, toList, member, merge )
 where
 
+import Test.QuickCheck
+
 data T a = Leaf | Node (T a) a (T a)
     deriving Show
 
