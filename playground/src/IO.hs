@@ -9,3 +9,25 @@ myGetLine = do
             do
             xs <- getLine
             return (x : xs)
+
+myPutStr :: String -> IO ()
+myPutStr [] = return ()
+myPutStr (x:xs) = do
+    putChar x
+    myPutStr xs
+
+myPutStrLn :: String -> IO ()
+myPutStrLn [] = do 
+    putChar '\n'
+    return ()
+myPutStrLn (x:xs) = do
+    putChar x
+    myPutStrLn xs
+
+strLen :: IO ()
+strLen = do 
+    putStr "Enter a string: "
+    s <- getLine
+    putStr "The string has "
+    putStr (show (length s))
+    putStrLn " characters." 
