@@ -1,6 +1,6 @@
 module Lamcalc
-    ( reduce
-    ) where
+    ( Term (..), prettyPrint, reduce, nfin, freeVars, substitute
+    ) where 
 
 import qualified Data.Set as Set
 
@@ -23,21 +23,12 @@ prettyPrint (Var x) = x
 prettyPrint (Abs x term) = "(%" ++ x ++ "." ++ prettyPrint term ++ ")"
 prettyPrint (App term1 term2) = "(" ++ prettyPrint term1 ++ " " ++ prettyPrint term2 ++ ")"
 
-
--- >>> prettyPrint (App (Abs "x" (Var "x")) (Var "a"))
--- "((%x.x) a)"
-
 nfin :: Id -> Term -> Bool
 nfin x (Var y) = False                          -- single variable is always free
 nfin x (Abs y term)                             -- abstraction of a variable could capture
     | x == y = True
     | otherwise = nfin x term
 nfin x (App t1 t2) = nfin x t1 || nfin x t2     -- application must be recursively checked
-
--- >>> nfin "x" (App (Abs "x" (Var "x")) (Var "a"))
--- True
--- >>> nfin "b" (App (Abs "x" (Var "x")) (Var "a"))
--- False
 
 -- >>> nfin "x" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
 -- True
@@ -54,9 +45,7 @@ freeVars (App term1 (Var v))
     | otherwise = Set.insert v (freeVars term1)
 freeVars (App term1 term2) = Set.union (freeVars term1) (freeVars term2)
 
--- >>> freeVars (App (Var "x") (Var "y")) == Set.fromList ["x","y"]
--- True
--- >>> freeVars (Abs "x" (App (Var "x") (Var "y"))) == Set.fromList["y"]
+-- >>> 
 -- True
 -- >>> freeVars (Abs "y" (App (Var "x") (Var "y"))) == Set.fromList ["x"]
 -- True
