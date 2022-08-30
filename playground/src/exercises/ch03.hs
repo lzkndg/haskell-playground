@@ -20,7 +20,10 @@ module Ch03 where
 
 -- second xs = head (tail xs)
 second :: [a] -> a
-second = undefined
+second (_:xs) = fst xs 
+
+
+first (x:xs) = x
 
 -- swap (x, y) = (y, x)
 swap :: (a, b) -> (b, a)
@@ -41,3 +44,6 @@ palindrome = undefined
 -- twice f x = f (f x)
 twice :: (a -> a) -> a -> a
 twice = undefined
+
+
+myConcat xss = [x | x <- xs, xs <- xss]
