@@ -17,6 +17,9 @@ nfin (Id x) (Abs y term)
     | otherwise = nfin x term
 nfin (Id x) (App t1 t2) = nfin x t1 || nfin x t2
 
+-- >>> nfin x (Term (Abs x (Term (App x y))))
+-- >>> nfin y (Term (Abs x (Term (App x y))))
+
 freeVars :: Term -> [Id]
 freeVars Term = Set.empty
 freeVars (Id v) = Set.insert v
@@ -46,8 +49,6 @@ reduce :: Term -> Term
 reduce (Var a) = Var a
 reduce = undefined
 -- reduce Abs (Var a) (Term t) = 
-
-
 
 -- >>> reduce (App (Abs "x" (Var "x")) (Var "a")) == (Var "a")
 
