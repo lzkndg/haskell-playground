@@ -1,49 +1,96 @@
 module Lamcalc
-    ( reduce
-    ) where
+    ( Term (..), prettyPrint, reduce, nfin, freeVars, substitute
+    ) where 
+
+import qualified Data.Set as Set
 
 import qualified Data.Set as Set
 
 type Id = String
-
 data Term = Var Id   -- Variables
     | Abs Id Term    -- Abstractions
     | App Term Term  -- Applications
 
+instance Eq Term where
+    Var a == Var b = a == b
+    Abs x1 term1 == Abs x2 term2 = x1 == x2 && term1 == term2
+    App term1 term2 == App term3 term4 = term1 == term3 && term2 == term4
+    _ == _ = False
+
+instance Show Term where
+    show = prettyPrint
+
+prettyPrint :: Term -> String
+prettyPrint (Var x) = x
+prettyPrint (Abs x term) = "(%" ++ x ++ "." ++ prettyPrint term ++ ")"
+prettyPrint (App term1 term2) = "(" ++ prettyPrint term1 ++ " " ++ prettyPrint term2 ++ ")"
+
 nfin :: Id -> Term -> Bool
-nfin (Id x) (Id y) = False                          -- single variable is always free
-nfin (Id x) (Abs y term)
+nfin x (Var y) = False                          -- single variable is always free
+nfin x (Abs y term)                             -- abstraction of a variable could capture
     | x == y = True
     | otherwise = nfin x term
-nfin (Id x) (App t1 t2) = nfin x t1 || nfin x t2
+nfin x (App t1 t2) = nfin x t1 || nfin x t2     -- application must be recursively checked
 
--- >>> nfin x (Term (Abs x (Term (App x y))))
--- >>> nfin y (Term (Abs x (Term (App x y))))
+-- >>> nfin "x" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
+-- True
+-- >>> nfin "y" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
+-- True
+-- >>> nfin "a" (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))
+-- False
 
-freeVars :: Term -> [Id]
-freeVars Term = Set.empty
-freeVars (Id v) = Set.insert v
-freeVars (Abs x term)
-    | x nfin term = delete x (freeVars term)
-    | otherwise = Set.union (Set.insert x) (freeVars term)
+freeVars :: Term -> Set.Set Id
+freeVars (Var v) = Set.insert v Set.empty
+freeVars (Abs x term) = Set.delete x (freeVars term)
+freeVars (App term1 (Var v))
+    | nfin v term1 = freeVars term1
+    | otherwise = Set.insert v (freeVars term1)
 freeVars (App term1 term2) = Set.union (freeVars term1) (freeVars term2)
 
-substitute :: (Id, Term) -> Term
-substitute = undefined
+-- >>> 
+-- True
+-- >>> freeVars (Abs "y" (App (Var "x") (Var "y"))) == Set.fromList ["x"]
+-- True
+-- >>> freeVars (Abs "z" (App (Var "x") (Var "y"))) == Set.fromList ["x","y"]
+-- True
 
-isBetaRedex :: Term -> Bool 
-isBetaRedex = undefined
--- isBetaRedex (Var id) = False
--- isBetaRedex (Abs id (Var v)) = False
--- -- isBetaRedex (Abs id (Term t)) = isBetaRedex t
--- isBetaRedex (App t1 t2) = isBetaRedex t1 || isBetaRedex t2
--- -- isBetaRedex (App (Abs x t) (Var id)) = True
--- isBetaRedex (Abs [] (Abs _ _)) = False
--- isBetaRedex (Abs [] (App _ _)) = False
--- isBetaRedex (Abs [_] (App _ _)) = False
--- isBetaRedex (Abs (_:_) (Abs _ _)) = False 
--- isBetaRedex (Abs (_:_) (App _ _)) = False
+-- >>> freeVars (Abs "y" (Abs "x" (App (Var "x") (Var "y")))) == Set.fromList []
+-- True
 
+-- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y")) == Set.fromList []
+-- True
+-- >>> freeVars (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "z")) == Set.fromList ["z"]
+-- True
+
+substitute :: (Id, Term) -> Term -> Term
+-- substitute (x, tx) t replaces all free occurrences of the variable xi within the term t with the variable name tx, assuming the variable has a free occurence.
+substitute (x, termx) (Var y)
+    | x == y = termx
+    | otherwise = Var y
+substitute (x, termx) (Abs y term)
+    | x /= y = Abs y (substitute (x, termx) term)
+    | otherwise = undefined
+substitute (x, termx) (App term1 term2) = App (substitute (x, termx) term1) (substitute (x, termx) term2)
+
+-- >>> prettyPrint (substitute ("y", (Var "z")) (Var "y")) == "z"
+-- True
+-- >>> substitute ("y", (Var "z")) (Abs "x" (Var "y")) == Abs "x" (Var "z")
+-- True
+
+isBetaRedex :: Term -> Bool
+isBetaRedex (App (Abs "x" term1) term2) = True
+isBetaRedex _ = False
+
+betaReduce :: Term -> Term
+betaReduce (App (Abs x term1) term2) = substitute (x, term2) (Abs x term1)
+betaReduce term = term
+
+reduce :: Term -> Term
+reduce term1 = undefined
+-- reduce term1 | isBetaRedex term1 = 
+
+-- >>> betaReduce (App (Abs "x" (Var "x")) (Var "a"))
+-- Prelude.undefined
 
 reduce :: Term -> Term
 reduce (Var a) = Var a
@@ -90,4 +137,3 @@ Abs (id y) ( Term ((id y) * (id x)) )
 
 -- `(λx.λy.x y) y` reduces to a term that is alpha equivalent to `λz.y z`
 -- >>> alphaEq (reduce (App (Abs "x" (Abs "y" (App (Var "x") (Var "y")))) (Var "y"))) (Abs "z" (App (Var "y") (Var "z")))
--- True
